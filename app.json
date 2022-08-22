@@ -24,7 +24,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.munna_khandakar.myapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
