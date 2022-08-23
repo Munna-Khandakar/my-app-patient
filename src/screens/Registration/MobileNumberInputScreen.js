@@ -6,20 +6,62 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
-import React from "react";
+import axios from "axios";
+import React, { useState } from "react";
 import { useFonts } from "expo-font";
-import { MaterialIcons, Feather } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const MobileNumberInputScreen = ({ navigation }) => {
   const [loaded] = useFonts({
     Montserrat: require("../../../assets/fonts/Montserrat.ttf"),
   });
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [mobile, setMobile] = useState("");
   if (!loaded) {
     return null;
   }
-
+  const sendOTPCode = () => {
+    setIsLoading(true);
+    // mobile number modify
+    let only_phone_number = 0;
+    // regualr expression checking to remove country code and extra spaces and dash
+    only_phone_number = mobile.replace(/\D/g, "").slice(-11);
+    if (only_phone_number.length !== 11) {
+      setIsLoading(false);
+      return alert("Check Your Phone Number");
+    }
+    axios
+      .post("http://localhost:5000/api/otp/sendOTP", {
+        mobile: only_phone_number,
+      })
+      .then((result) => {
+        if (result.data.success) {
+          console.log(result.data.success);
+          setIsLoading(false);
+          navigation.navigate("OTPInputScreen", {
+            msg: result.data.success,
+            mobile: only_phone_number,
+          });
+        }
+        if (result.data.varified) {
+          console.log(result.data.varified);
+          setIsLoading(false);
+          return alert(result.data.varified);
+        }
+        if (result.data.error) {
+          console.log(result.data.error);
+          setIsLoading(false);
+          return alert(result.data.error);
+        }
+      })
+      .catch((err) => {
+        console.log("2");
+        console.log(err);
+      });
+    //   navigation.navigate("OTPInputScreen");
+  };
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: "center" }}>
       <View style={{ paddingHorizontal: 10 }}>
@@ -63,6 +105,8 @@ const MobileNumberInputScreen = ({ navigation }) => {
             placeholder="Phone Number"
             style={{ flex: 1, paddingVertical: 0 }}
             keyboardType="phone-pad"
+            value={mobile}
+            onChangeText={(number) => setMobile(number)}
           />
         </View>
         {/* back,next button */}
@@ -99,9 +143,8 @@ const MobileNumberInputScreen = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("OTPInputScreen");
-            }}
+            disabled={isLoading}
+            onPress={sendOTPCode}
             style={{
               flex: 1,
               backgroundColor: "#AD40AF",
@@ -111,11 +154,19 @@ const MobileNumberInputScreen = ({ navigation }) => {
               marginLeft: 10,
             }}
           >
-            <Text
-              style={{ textAlign: "center", fontWeight: "700", color: "white" }}
-            >
-              Next
-            </Text>
+            {isLoading ? (
+              <ActivityIndicator />
+            ) : (
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "700",
+                  color: "white",
+                }}
+              >
+                Next
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "center" }}>

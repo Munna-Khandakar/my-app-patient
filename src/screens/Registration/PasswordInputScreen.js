@@ -7,20 +7,57 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  ActivityIndicator,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useFonts } from "expo-font";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
+import axios from "axios";
 
-const PasswordInputScreen = ({ navigation }) => {
+const PasswordInputScreen = ({ route, navigation }) => {
   const [loaded] = useFonts({
     Montserrat: require("../../../assets/fonts/Montserrat.ttf"),
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const { verified, mobile } = route.params;
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [seePassword, setSeePassword] = useState(false);
+  const [seeConfirmPassword, setSeeConfirmPassword] = useState(false);
   if (!loaded) {
     return null;
   }
 
+  const registration = async () => {
+    console.log(verified);
+    console.log(mobile);
+    console.log(password);
+    setIsLoading(true);
+    if (!verified && !mobile) {
+      setIsLoading(false);
+      return alert("Please verify your phone number firse");
+    }
+    axios
+      .post("http://localhost:5000/api/auth/register", {
+        verified,
+        mobile,
+        password,
+      })
+      .then((result) => {
+        if (result) {
+          setIsLoading(false);
+          navigation.navigate("LoginScreen", {
+            msg: "Login to enter your account",
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+        return alert("Opps,Something went wrong..!");
+      });
+  };
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: "center" }}>
       <View style={{ paddingHorizontal: 10 }}>
@@ -63,7 +100,9 @@ const PasswordInputScreen = ({ navigation }) => {
           <TextInput
             placeholder="Password"
             style={{ flex: 1, paddingVertical: 0 }}
-            secureTextEntry={true}
+            secureTextEntry={!seePassword}
+            value={password}
+            onChangeText={(number) => setPassword(number)}
           />
           <TouchableOpacity onPress={() => {}}>
             <Feather
@@ -92,7 +131,9 @@ const PasswordInputScreen = ({ navigation }) => {
           <TextInput
             placeholder="Confirm Password"
             style={{ flex: 1, paddingVertical: 0 }}
-            secureTextEntry={true}
+            secureTextEntry={!seeConfirmPassword}
+            value={confirmPassword}
+            onChangeText={(number) => setConfirmPassword(number)}
           />
           <TouchableOpacity onPress={() => {}}>
             <Feather
@@ -137,9 +178,7 @@ const PasswordInputScreen = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => {
-              Alert.alert("Do REGISTER");
-            }}
+            onPress={registration}
             style={{
               flex: 1,
               backgroundColor: "#AD40AF",
@@ -149,11 +188,19 @@ const PasswordInputScreen = ({ navigation }) => {
               marginLeft: 10,
             }}
           >
-            <Text
-              style={{ textAlign: "center", fontWeight: "700", color: "white" }}
-            >
-              Register
-            </Text>
+            {isLoading ? (
+              <ActivityIndicator />
+            ) : (
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "700",
+                  color: "white",
+                }}
+              >
+                Register
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "center" }}>

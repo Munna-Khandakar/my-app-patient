@@ -6,19 +6,55 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import { useFonts } from "expo-font";
-import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-const OTPInputScreen = ({ navigation }) => {
+const OTPInputScreen = ({ route, navigation }) => {
   const [loaded] = useFonts({
     Montserrat: require("../../../assets/fonts/Montserrat.ttf"),
   });
 
+  const { msg, mobile } = route.params;
+  const [isLoading, setIsLoading] = useState(false);
+  const [otp, setOtp] = useState("");
   if (!loaded) {
     return null;
   }
+
+  const verifyOTP = async () => {
+    setIsLoading(true);
+    // check otp code not empty
+    if (!otp) {
+      setIsLoading(false);
+      return alert("OTP code can't be empty");
+    }
+    axios
+      .put("http://localhost:5000/api/otp/verifyOTP", { otp, mobile })
+      .then((result) => {
+        if (result.data.varified) {
+          console.log(result.data.varified);
+          setIsLoading(false);
+          navigation.navigate("PasswordInputScreen", {
+            mobile,
+            verified: true,
+          });
+        }
+        if (result.data.notVarified) {
+          console.log(result.data.varified);
+          setIsLoading(false);
+          return alert(result.data.notVarified);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+        return alert("Opps,Something went wrong..!");
+      });
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: "center" }}>
@@ -39,10 +75,22 @@ const OTPInputScreen = ({ navigation }) => {
             fontSize: 28,
             fontFamily: "Montserrat",
             fontWeight: 500,
-            marginBottom: 30,
+            marginBottom: 10,
+            textAlign: "center",
           }}
         >
           OTP Verification
+        </Text>
+        <Text
+          style={{
+            fontSize: 15,
+            fontFamily: "Montserrat",
+            fontWeight: 50,
+            marginBottom: 30,
+            textAlign: "center",
+          }}
+        >
+          {msg}
         </Text>
         <View
           style={{
@@ -63,6 +111,8 @@ const OTPInputScreen = ({ navigation }) => {
             placeholder="OTP Code"
             style={{ flex: 1, paddingVertical: 0 }}
             keyboardType="phone-pad"
+            value={otp}
+            onChangeText={(number) => setOtp(number)}
           />
         </View>
         {/* back,next button */}
@@ -99,9 +149,8 @@ const OTPInputScreen = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("PasswordInputScreen");
-            }}
+            disabled={isLoading}
+            onPress={verifyOTP}
             style={{
               flex: 1,
               backgroundColor: "#AD40AF",
@@ -111,11 +160,19 @@ const OTPInputScreen = ({ navigation }) => {
               marginLeft: 10,
             }}
           >
-            <Text
-              style={{ textAlign: "center", fontWeight: "700", color: "white" }}
-            >
-              Next
-            </Text>
+            {isLoading ? (
+              <ActivityIndicator />
+            ) : (
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "700",
+                  color: "white",
+                }}
+              >
+                Next
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "center" }}>
