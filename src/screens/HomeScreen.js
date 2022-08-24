@@ -8,9 +8,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StatusBar,
 } from "react-native";
 import { useFonts } from "expo-font";
 import React from "react";
+import axios from "axios";
 import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import { sliderData } from "../models/data";
 import BannerSlider from "../components/BannerSlider";
@@ -20,9 +22,21 @@ const HomeScreen = ({ navigation }) => {
     Montserrat: require("../../assets/fonts/Montserrat.ttf"),
   });
 
+  const emergencyCallHandler = () => {
+    axios
+      .get("http://localhost:5000/api/emergency")
+      .then((result) => {
+        alert("Wait for doctor response...");
+      })
+      .catch((err) => {
+        console.log(err);
+        return alert("Opps,Something went wrong..!");
+      });
+  };
   if (!loaded) {
     return null;
   }
+
   const renderItem = ({ item }) => {
     return <BannerSlider data={item} />;
   };
@@ -79,6 +93,7 @@ const HomeScreen = ({ navigation }) => {
           <TextInput placeholder="Mirpur DOHS, Mirpur 12, Dhaka" />
         </View>
         <TouchableOpacity
+          onPress={emergencyCallHandler}
           style={{
             flexDirection: "row",
             borderColor: "#F37878",
@@ -100,7 +115,7 @@ const HomeScreen = ({ navigation }) => {
           />
 
           <Text style={{ textAlign: "center", color: "#F37878" }}>
-            EMERGENCY
+            EMERGENCY-2
           </Text>
         </TouchableOpacity>
         <View

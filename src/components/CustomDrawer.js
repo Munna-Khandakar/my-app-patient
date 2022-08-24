@@ -87,7 +87,7 @@ const CustomDrawer = (props) => {
             <Text
               style={{
                 fontFamily: "Montserrat",
-                fontSize: "20",
+                fontSize: 20,
                 marginLeft: 10,
               }}
             >
@@ -107,7 +107,7 @@ const CustomDrawer = (props) => {
             <Text
               style={{
                 fontFamily: "Montserrat",
-                fontSize: "20",
+                fontSize: 20,
                 marginLeft: 10,
               }}
             >

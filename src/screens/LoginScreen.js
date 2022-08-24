@@ -40,7 +40,7 @@ const LoginScreen = ({ navigation }) => {
           style={{
             fontSize: 28,
             fontFamily: "Montserrat",
-            fontWeight: 500,
+            fontWeight: "500",
             marginBottom: 30,
           }}
         >
