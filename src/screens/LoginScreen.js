@@ -7,13 +7,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useFonts } from "expo-font";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AuthContext } from "../context/AuthContext";
 
 const LoginScreen = ({ navigation }) => {
   const { login } = useContext(AuthContext);
+  const [mobile, setMobile] = useState("");
+  const [password, setPassword] = useState("");
   const [loaded] = useFonts({
     Montserrat: require("../../assets/fonts/Montserrat.ttf"),
   });
@@ -65,6 +67,8 @@ const LoginScreen = ({ navigation }) => {
             placeholder="Phone Number"
             style={{ flex: 1, paddingVertical: 0 }}
             keyboardType="phone-pad"
+            value={mobile}
+            onChangeText={(number) => setMobile(number)}
           />
         </View>
         <View
@@ -86,13 +90,15 @@ const LoginScreen = ({ navigation }) => {
             placeholder="Password"
             style={{ flex: 1, paddingVertical: 0 }}
             secureTextEntry={true}
+            value={password}
+            onChangeText={(number) => setPassword(number)}
           />
           <TouchableOpacity onPress={() => {}}>
             <Text style={{ color: "#AD40AF", fontWeight: "700" }}>Forgot?</Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity
-          onPress={login}
+          onPress={() => login(mobile, password)}
           style={{
             backgroundColor: "#AD40AF",
             padding: 20,

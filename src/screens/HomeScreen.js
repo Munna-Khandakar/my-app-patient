@@ -8,23 +8,48 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  StatusBar,
+  Platform,
 } from "react-native";
 import { useFonts } from "expo-font";
-import React from "react";
+import * as Location from "expo-location";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import { sliderData } from "../models/data";
 import BannerSlider from "../components/BannerSlider";
+import { PROXY_URL } from "@env";
+
 const HomeScreen = ({ navigation }) => {
+  // variables
   const [loaded] = useFonts({
     "Roboto-Medium": require("../../assets/fonts/Roboto-Medium.ttf"),
     Montserrat: require("../../assets/fonts/Montserrat.ttf"),
   });
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
 
+  // location api
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        alert("Permission to access location was denied");
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      // console.log("latitude : " + location.coords.latitude);
+      // console.log("longitude : " + location.coords.longitude);
+      setLocation(location);
+    })();
+  }, []);
+
+  // call handler
   const emergencyCallHandler = () => {
     axios
-      .get("http://localhost:5000/api/emergency")
+      .get(`${PROXY_URL}/api/emergency`)
       .then((result) => {
         alert("Wait for doctor response...");
       })
@@ -37,12 +62,14 @@ const HomeScreen = ({ navigation }) => {
     return null;
   }
 
+  // banner for FlatList
   const renderItem = ({ item }) => {
     return <BannerSlider data={item} />;
   };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <ScrollView style={{ padding: 20 }}>
+      <ScrollView style={{ padding: 20, marginTop: 20 }}>
         <View
           style={{
             justifyContent: "space-between",

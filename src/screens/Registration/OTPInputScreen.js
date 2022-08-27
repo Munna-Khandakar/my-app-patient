@@ -12,6 +12,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useFonts } from "expo-font";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { PROXY_URL } from "@env";
 
 const OTPInputScreen = ({ route, navigation }) => {
   const [loaded] = useFonts({
@@ -33,7 +34,7 @@ const OTPInputScreen = ({ route, navigation }) => {
       return alert("OTP code can't be empty");
     }
     axios
-      .put("http://localhost:5000/api/otp/verifyOTP", { otp, mobile })
+      .put(`${PROXY_URL}/api/otp/verifyOTP`, { otp, mobile })
       .then((result) => {
         if (result.data.varified) {
           console.log(result.data.varified);
@@ -50,7 +51,7 @@ const OTPInputScreen = ({ route, navigation }) => {
         }
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err.response.data);
         setIsLoading(false);
         return alert("Opps,Something went wrong..!");
       });
@@ -85,7 +86,7 @@ const OTPInputScreen = ({ route, navigation }) => {
           style={{
             fontSize: 15,
             fontFamily: "Montserrat",
-            fontWeight: 50,
+            fontWeight: "50",
             marginBottom: 30,
             textAlign: "center",
           }}

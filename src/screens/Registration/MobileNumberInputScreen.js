@@ -12,6 +12,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useFonts } from "expo-font";
 import { MaterialIcons } from "@expo/vector-icons";
+import { PROXY_URL } from "@env";
 
 const MobileNumberInputScreen = ({ navigation }) => {
   const [loaded] = useFonts({
@@ -22,7 +23,20 @@ const MobileNumberInputScreen = ({ navigation }) => {
   if (!loaded) {
     return null;
   }
-  const sendOTPCode = () => {
+
+  const sendGetRequest = async () => {
+    try {
+      const resp = await axios.get(
+        "https://jsonplaceholder.typicode.com/posts"
+      );
+      console.log(resp.data);
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
+    }
+  };
+
+  const sendOTPCode = async () => {
     setIsLoading(true);
     // mobile number modify
     let only_phone_number = 0;
@@ -32,8 +46,9 @@ const MobileNumberInputScreen = ({ navigation }) => {
       setIsLoading(false);
       return alert("Check Your Phone Number");
     }
+
     axios
-      .post("http://localhost:5000/api/otp/sendOTP", {
+      .post(`${PROXY_URL}/api/otp/sendOTP`, {
         mobile: only_phone_number,
       })
       .then((result) => {
@@ -57,8 +72,9 @@ const MobileNumberInputScreen = ({ navigation }) => {
         }
       })
       .catch((err) => {
-        console.log("2");
+        console.log("error during sending the otp");
         console.log(err);
+        setIsLoading(false);
       });
     //   navigation.navigate("OTPInputScreen");
   };
@@ -123,7 +139,6 @@ const MobileNumberInputScreen = ({ navigation }) => {
             }}
             style={{
               flex: 1,
-
               borderWidth: 1,
               borderColor: "#AD40AF",
               padding: 20,

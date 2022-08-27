@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import { useFonts } from "expo-font";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import axios from "axios";
+import { PROXY_URL } from "@env";
 
 const PasswordInputScreen = ({ route, navigation }) => {
   const [loaded] = useFonts({
@@ -36,10 +37,10 @@ const PasswordInputScreen = ({ route, navigation }) => {
     setIsLoading(true);
     if (!verified && !mobile) {
       setIsLoading(false);
-      return alert("Please verify your phone number firse");
+      return alert("Please verify your phone number first");
     }
     axios
-      .post("http://localhost:5000/api/auth/register", {
+      .post(`${PROXY_URL}/api/auth/register`, {
         verified,
         mobile,
         password,
