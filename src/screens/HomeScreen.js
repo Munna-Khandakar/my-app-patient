@@ -18,15 +18,26 @@ import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import { sliderData } from "../models/data";
 import BannerSlider from "../components/BannerSlider";
 import { PROXY_URL } from "@env";
+import io from "socket.io-client";
 
 const HomeScreen = ({ navigation }) => {
   // variables
+  const socket = io(`${PROXY_URL}`, { transports: ["websocket"] });
   const [loaded] = useFonts({
     "Roboto-Medium": require("../../assets/fonts/Roboto-Medium.ttf"),
     Montserrat: require("../../assets/fonts/Montserrat.ttf"),
   });
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  // // socket setup
+  // React.useEffect(() => {
+  //   socket.on("connect", () => console.log("socketId: " + socket.id));
+  //   // socket.on("SendAvailableEmergencyDoctor", (data) => {
+  //   //   console.log(data);
+  //   //   navigation.navigate("Nearby");
+  //   // });
+  // }, []);
 
   // location api
   useEffect(() => {
@@ -40,9 +51,9 @@ const HomeScreen = ({ navigation }) => {
       }
 
       let location = await Location.getCurrentPositionAsync({});
-      // console.log("latitude : " + location.coords.latitude);
-      // console.log("longitude : " + location.coords.longitude);
-      setLocation(location);
+      console.log("latitude of Patient : " + location.coords.latitude);
+      console.log("longitude of Patient: " + location.coords.longitude);
+      setLocation(location.coords);
     })();
   }, []);
 
@@ -51,7 +62,11 @@ const HomeScreen = ({ navigation }) => {
     axios
       .get(`${PROXY_URL}/api/emergency`)
       .then((result) => {
-        alert("Wait for doctor response...");
+        navigation.navigate("Nearby", {
+          doctors: result.data.doctors,
+          location,
+        });
+        // alert("Wait for doctor response...");
       })
       .catch((err) => {
         console.log(err);

@@ -5,8 +5,9 @@ import SettingScreen from "../screens/SettingScreen";
 import WalletScreen from "../screens/WalletScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import CustomDrawer from "../components/CustomDrawer";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
+import Nearby from "../screens/Nearby";
 const Drawer = createDrawerNavigator();
 
 const AppStack = () => {
@@ -38,6 +39,15 @@ const AppStack = () => {
         options={{
           drawerIcon: ({ color }) => (
             <Ionicons name="md-home-outline" size={22} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Nearby"
+        component={Nearby}
+        options={{
+          drawerIcon: ({ color }) => (
+            <MaterialIcons name="near-me" size={22} color={color} />
           ),
         }}
       />

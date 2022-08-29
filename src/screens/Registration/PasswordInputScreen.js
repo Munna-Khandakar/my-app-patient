@@ -39,6 +39,10 @@ const PasswordInputScreen = ({ route, navigation }) => {
       setIsLoading(false);
       return alert("Please verify your phone number first");
     }
+    if (password !== confirmPassword) {
+      setIsLoading(false);
+      return alert("Password and Confirm Password not matched...");
+    }
     axios
       .post(`${PROXY_URL}/api/auth/register`, {
         verified,
