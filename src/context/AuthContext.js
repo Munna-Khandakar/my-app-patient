@@ -17,6 +17,17 @@ export const AuthProvider = ({ children }) => {
     await SecureStore.setItemAsync(key, value);
   }
 
+  saveUserInfoAsyncStorage = async (value) => {
+    try {
+      setUserInfo(value);
+      console.log("context of userinfo updated...");
+      await AsyncStorage.setItem("userInfo", JSON.stringify(value));
+      console.log("async storage of userinfo updated...");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const login = async (mobile, password) => {
     setIsLoading(true);
     axios
@@ -49,6 +60,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   };
 
+  // checking user is logged in or not
   const isLoggedIn = async () => {
     try {
       setIsLoading(true);
@@ -101,6 +113,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // user registration
   const registration = async (verified, mobile, password) => {
     setIsLoading(true);
     if (!verified && !mobile) {
@@ -128,9 +141,38 @@ export const AuthProvider = ({ children }) => {
       });
   };
 
+  const updateProfile = async (data) => {
+    setIsLoading(true);
+    try {
+      const resp = await axios.put(`${PROXY_URL}/api/users/profile`, data, {
+        headers: {
+          "Content-type": "Application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      if (resp.data) {
+        saveUserInfoAsyncStorage(resp.data.user);
+        setIsLoading(false);
+        return alert(resp.data.success);
+      }
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+      return alert("Something went wrong...");
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ login, logout, isLoading, registration, userInfo, userToken }}
+      value={{
+        login,
+        logout,
+        isLoading,
+        registration,
+        userInfo,
+        userToken,
+        updateProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>

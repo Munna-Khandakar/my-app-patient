@@ -16,7 +16,7 @@ import {
 import { AuthContext } from "../context/AuthContext";
 
 const CustomDrawer = (props) => {
-  const { logout } = useContext(AuthContext);
+  const { logout, userInfo } = useContext(AuthContext);
   const [loaded] = useFonts({
     Montserrat: require("../../assets/fonts/Montserrat.ttf"),
   });
@@ -47,7 +47,7 @@ const CustomDrawer = (props) => {
           <Text
             style={{ color: "white", fontSize: 20, fontFamily: "Montserrat" }}
           >
-            Munna Khondoker
+            {userInfo.fullName ? userInfo.fullName : "loading..."}
           </Text>
           <View
             style={{

@@ -25,7 +25,7 @@ const AppStack = () => {
         drawerActiveBackgroundColor: "#aa18ea",
         drawerActiveTintColor: "white",
         drawerInactiveTintColor: "#333",
-        headerShown: false,
+        // headerShown: false,
         drawerLabelStyle: {
           marginLeft: -25,
           fontFamily: "Roboto-Medium",
@@ -40,6 +40,7 @@ const AppStack = () => {
           drawerIcon: ({ color }) => (
             <Ionicons name="md-home-outline" size={22} color={color} />
           ),
+          headerShown: false,
         }}
       />
       <Drawer.Screen
