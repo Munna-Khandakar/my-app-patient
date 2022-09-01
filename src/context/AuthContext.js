@@ -14,40 +14,69 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   async function saveSecureData(key, value) {
-    await SecureStore.setItemAsync(key, value);
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch (error) {
+      console.log("error during saving SecureStore...");
+      console.log(error);
+    }
   }
 
   saveUserInfoAsyncStorage = async (value) => {
     try {
       setUserInfo(value);
-      console.log("context of userinfo updated...");
       await AsyncStorage.setItem("userInfo", JSON.stringify(value));
-      console.log("async storage of userinfo updated...");
     } catch (error) {
       console.log(error);
     }
   };
 
+  // const login = async (mobile, password) => {
+  //   setIsLoading(true);
+  //   axios
+  //     .post(`${PROXY_URL}/api/auth/login`, {
+  //       mobile,
+  //       password,
+  //     })
+  //     .then((res) => {
+  //       let userToken = res.data.token;
+  //       setUserToken(userToken);
+  //       saveSecureData("userToken", userToken);
+  //       getUserProfile(userToken);
+  //     })
+  //     .catch((error) => {
+  //       if (error.response) {
+  //         console.log(error.response.data.error);
+  //         setIsLoading(false);
+  //         return alert(error.response.data.error);
+  //       }
+  //     });
+  // };
+
   const login = async (mobile, password) => {
     setIsLoading(true);
-    axios
-      .post(`${PROXY_URL}/api/auth/login`, {
+    try {
+      const user = await axios.post(`${PROXY_URL}/api/auth/login`, {
         mobile,
         password,
-      })
-      .then((res) => {
-        let userToken = res.data.token;
-        setUserToken(userToken);
-        saveSecureData("userToken", userToken);
-        getUserProfile(userToken);
-      })
-      .catch((error) => {
-        if (error.response) {
-          console.log(error.response.data.error);
-          setIsLoading(false);
-          return alert(error.response.data.error);
-        }
       });
+      const token = await user.data.token;
+      const userInfo = await axios.get(`${PROXY_URL}/api/auth/profile`, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-type": "Application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserInfo(userInfo.data);
+      setUserToken(token);
+      saveUserInfoAsyncStorage(userInfo.data);
+      saveSecureData("userToken", token);
+      setIsLoading(false);
+      console.log("user info saved....");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   // logout | clear user token | clear user info
@@ -78,40 +107,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // get user details
-  const getUserProfile = async (token) => {
-    console.log("getUserProfile");
-    try {
-      axios
-        .get(`${PROXY_URL}/api/auth/profile`, {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Content-type": "Application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          let userInfo = res.data;
-          console.log("user info saved...");
-          setUserInfo(userInfo);
-          AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          if (error.response) {
-            console.log(error.response.data.error);
-            setIsLoading(false);
-            return alert(error.response.data.error);
-          }
-        });
-    } catch (error) {
-      if (error.response) {
-        console.log(error.response.data);
-        setIsLoading(false);
-        return alert("Something went wrong..");
-      }
-    }
-  };
+  // // get user details
+  // const getUserProfile = async (token) => {
+  //   console.log("getUserProfile");
+  //   try {
+  //     axios
+  //       .get(`${PROXY_URL}/api/auth/profile`, {
+  //         headers: {
+  //           "Access-Control-Allow-Origin": "*",
+  //           "Content-type": "Application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       })
+  //       .then((res) => {
+  //         let userInfo = res.data;
+  //         console.log("user info saved...");
+  //         setUserInfo(userInfo);
+  //         AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
+  //         setIsLoading(false);
+  //       })
+  //       .catch((error) => {
+  //         if (error.response) {
+  //           console.log(error.response.data.error);
+  //           setIsLoading(false);
+  //           return alert(error.response.data.error);
+  //         }
+  //       });
+  //   } catch (error) {
+  //     if (error.response) {
+  //       console.log(error.response.data);
+  //       setIsLoading(false);
+  //       return alert("Something went wrong..");
+  //     }
+  //   }
+  // };
 
   // user registration
   const registration = async (verified, mobile, password) => {
