@@ -8,6 +8,7 @@ import CustomDrawer from "../components/CustomDrawer";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import Nearby from "../screens/Nearby";
+import COLORS from "../utils/Colors";
 const Drawer = createDrawerNavigator();
 
 const AppStack = () => {
@@ -22,7 +23,7 @@ const AppStack = () => {
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawer {...props} />}
       screenOptions={{
-        drawerActiveBackgroundColor: "#aa18ea",
+        drawerActiveBackgroundColor: COLORS.main,
         drawerActiveTintColor: "white",
         drawerInactiveTintColor: "#333",
         // headerShown: false,

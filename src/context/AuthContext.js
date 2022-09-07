@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userToken, setUserToken] = useState(null);
   const [userInfo, setUserInfo] = useState();
+  const [sentCall, setSentCall] = useState(false);
   useEffect(() => {
     isLoggedIn();
   }, []);
@@ -30,28 +31,6 @@ export const AuthProvider = ({ children }) => {
       console.log(error);
     }
   };
-
-  // const login = async (mobile, password) => {
-  //   setIsLoading(true);
-  //   axios
-  //     .post(`${PROXY_URL}/api/auth/login`, {
-  //       mobile,
-  //       password,
-  //     })
-  //     .then((res) => {
-  //       let userToken = res.data.token;
-  //       setUserToken(userToken);
-  //       saveSecureData("userToken", userToken);
-  //       getUserProfile(userToken);
-  //     })
-  //     .catch((error) => {
-  //       if (error.response) {
-  //         console.log(error.response.data.error);
-  //         setIsLoading(false);
-  //         return alert(error.response.data.error);
-  //       }
-  //     });
-  // };
 
   const login = async (mobile, password) => {
     setIsLoading(true);
@@ -107,41 +86,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // // get user details
-  // const getUserProfile = async (token) => {
-  //   console.log("getUserProfile");
-  //   try {
-  //     axios
-  //       .get(`${PROXY_URL}/api/auth/profile`, {
-  //         headers: {
-  //           "Access-Control-Allow-Origin": "*",
-  //           "Content-type": "Application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       })
-  //       .then((res) => {
-  //         let userInfo = res.data;
-  //         console.log("user info saved...");
-  //         setUserInfo(userInfo);
-  //         AsyncStorage.setItem("userInfo", JSON.stringify(userInfo));
-  //         setIsLoading(false);
-  //       })
-  //       .catch((error) => {
-  //         if (error.response) {
-  //           console.log(error.response.data.error);
-  //           setIsLoading(false);
-  //           return alert(error.response.data.error);
-  //         }
-  //       });
-  //   } catch (error) {
-  //     if (error.response) {
-  //       console.log(error.response.data);
-  //       setIsLoading(false);
-  //       return alert("Something went wrong..");
-  //     }
-  //   }
-  // };
-
   // user registration
   const registration = async (verified, mobile, password) => {
     setIsLoading(true);
@@ -191,6 +135,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const sendEmergencyCall = async (data) => {
+    try {
+      const resp = await axios.post(`${PROXY_URL}/api/emergency`, data, {
+        headers: {
+          "Content-type": "Application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      if (resp.data) {
+        setSentCall(true);
+        return alert(resp.data);
+      }
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+      return alert("Something went wrong...");
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -201,6 +164,8 @@ export const AuthProvider = ({ children }) => {
         userInfo,
         userToken,
         updateProfile,
+        sendEmergencyCall,
+        sentCall,
       }}
     >
       {children}

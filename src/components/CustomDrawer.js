@@ -14,6 +14,7 @@ import {
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { AuthContext } from "../context/AuthContext";
+import COLORS from "../utils/Colors";
 
 const CustomDrawer = (props) => {
   const { logout, userInfo } = useContext(AuthContext);
@@ -29,10 +30,10 @@ const CustomDrawer = (props) => {
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView
         {...props}
-        contentContainerStyle={{ backgroundColor: "#8200d8" }}
+        contentContainerStyle={{ backgroundColor: COLORS.main }}
       >
         <ImageBackground
-          source={require("../../assets/images/menu-bg.jpeg")}
+          source={require("../../assets/images/menu-bg-6.png")}
           style={{ padding: 20 }}
         >
           <Image
