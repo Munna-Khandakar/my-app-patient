@@ -1,7 +1,14 @@
 import { StyleSheet, Text, View, TextInput } from "react-native";
 import React from "react";
 import COLORS from "../utils/Colors";
-const TextInputWithLabel = ({ label, icon, value, setValue, keyboardType }) => {
+const TextInputWithLabel = ({
+  label,
+  icon,
+  value,
+  setValue,
+  keyboardType,
+  editPermission,
+}) => {
   return (
     <View>
       <Text
@@ -32,6 +39,8 @@ const TextInputWithLabel = ({ label, icon, value, setValue, keyboardType }) => {
           keyboardType={keyboardType ? keyboardType : "default"}
           value={value}
           onChangeText={(number) => setValue(number)}
+          editable={editPermission}
+          selectTextOnFocus={editPermission}
         />
       </View>
     </View>

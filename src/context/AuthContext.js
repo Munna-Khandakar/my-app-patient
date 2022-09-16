@@ -9,7 +9,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userToken, setUserToken] = useState(null);
   const [userInfo, setUserInfo] = useState();
-  const [sentCall, setSentCall] = useState(false);
+  const [image, setImage] = useState("");
+  const [ukilRequestStatus, setUkilRequestStatus] = useState("make"); // make  wait  payment
   useEffect(() => {
     isLoggedIn();
   }, []);
@@ -144,10 +145,37 @@ export const AuthProvider = ({ children }) => {
         },
       });
       if (resp.data) {
-        setSentCall(true);
+        setUkilRequestStatus("wait");
         return alert(resp.data);
       }
     } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+      return alert("Something went wrong...");
+    }
+  };
+
+  const updateProfilePhoto = async (data) => {
+    setIsLoading(true);
+    try {
+      console.log("auth context....");
+      const resp = await axios.put(
+        `${PROXY_URL}/api/users/profile/photo`,
+        { photo: data },
+        {
+          headers: {
+            "Content-type": "Application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (resp.data) {
+        saveUserInfoAsyncStorage(resp.data.user);
+        setIsLoading(false);
+        return alert(resp.data.success);
+      }
+    } catch (err) {
+      console.log("auth errpr");
       console.error(err);
       setIsLoading(false);
       return alert("Something went wrong...");
@@ -165,7 +193,11 @@ export const AuthProvider = ({ children }) => {
         userToken,
         updateProfile,
         sendEmergencyCall,
-        sentCall,
+        ukilRequestStatus,
+        setUkilRequestStatus,
+        image,
+        setImage,
+        updateProfilePhoto,
       }}
     >
       {children}

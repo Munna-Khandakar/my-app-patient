@@ -37,7 +37,11 @@ const CustomDrawer = (props) => {
           style={{ padding: 20 }}
         >
           <Image
-            source={require("../../assets/images/user-profile.jpg")}
+            source={
+              userInfo.photo
+                ? { uri: userInfo.photo }
+                : require("../../assets/images/user-profile.jpg")
+            }
             style={{
               height: 80,
               width: 80,

@@ -21,6 +21,8 @@ import BannerSlider from "../components/BannerSlider";
 import { PROXY_URL } from "@env";
 import io from "socket.io-client";
 import { AuthContext } from "../context/AuthContext";
+import RequestScreen from "./RequestScreen";
+import PaymentScreen from "./PaymentScreen";
 const HomeScreen = ({ navigation }) => {
   // variables
   const socket = io(`${PROXY_URL}`, { transports: ["websocket"] });
@@ -28,7 +30,12 @@ const HomeScreen = ({ navigation }) => {
     "Roboto-Medium": require("../../assets/fonts/Roboto-Medium.ttf"),
     Montserrat: require("../../assets/fonts/Montserrat.ttf"),
   });
-  const { userInfo, sendEmergencyCall, sentCall } = useContext(AuthContext);
+  const {
+    userInfo,
+    sendEmergencyCall,
+    ukilRequestStatus,
+    setUkilRequestStatus,
+  } = useContext(AuthContext);
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -36,6 +43,11 @@ const HomeScreen = ({ navigation }) => {
   // socket setup
   React.useEffect(() => {
     socket.emit("MapUserId", userInfo?._id);
+  }, []);
+  React.useEffect(() => {
+    socket.on("ClientPayment", () => {
+      setUkilRequestStatus("payment");
+    });
   }, []);
 
   // location api
@@ -78,6 +90,67 @@ const HomeScreen = ({ navigation }) => {
     return <BannerSlider data={item} />;
   };
 
+  const HomeScreenPage = () => {
+    switch (ukilRequestStatus) {
+      case "make":
+        return (
+          <View>
+            <TouchableOpacity
+              onPress={emergencyCallHandler}
+              style={{
+                flexDirection: "row",
+                marginBottom: 10,
+                marginTop: 10,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Image
+                source={require("../../assets/call.png")}
+                style={{
+                  flex: 1,
+                  resizeMode: "stretch",
+                  height: 200,
+                  width: "100%",
+                  borderRadius: 10,
+                }}
+              />
+            </TouchableOpacity>
+            <View
+              style={{
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexDirection: "row",
+                marginBottom: 10,
+              }}
+            >
+              <Text style={{ fontSize: 16, fontFamily: "Roboto-Medium" }}>
+                Categories..
+              </Text>
+              <TouchableOpacity>
+                <Text style={{ color: "#0aada8" }}>See More</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={sliderData}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.image}
+              horizontal={true}
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}
+            />
+          </View>
+        );
+        break;
+      case "wait":
+        return <RequestScreen />;
+        break;
+      case "payment":
+        return <PaymentScreen />;
+        break;
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <ScrollView style={{ padding: 20, marginTop: 20 }}>
@@ -95,7 +168,7 @@ const HomeScreen = ({ navigation }) => {
               fontWeight: "bold",
             }}
           >
-            MYAPP
+            UKILBABU
           </Text>
           <TouchableOpacity
             onPress={() => {
@@ -103,7 +176,11 @@ const HomeScreen = ({ navigation }) => {
             }}
           >
             <ImageBackground
-              source={require("../../assets/images/user-profile.jpg")}
+              source={
+                userInfo.photo
+                  ? { uri: userInfo.photo }
+                  : require("../../assets/images/user-profile.jpg")
+              }
               style={{ width: 35, height: 35 }}
               imageStyle={{ borderRadius: 25 }}
             />
@@ -136,50 +213,7 @@ const HomeScreen = ({ navigation }) => {
             }
           />
         </View>
-        <TouchableOpacity
-          onPress={emergencyCallHandler}
-          style={{
-            flexDirection: "row",
-            marginBottom: 10,
-            marginTop: 10,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Image
-            source={require("../../assets/call.png")}
-            style={{
-              flex: 1,
-              resizeMode: "stretch",
-              height: 200,
-              width: "100%",
-              borderRadius: 10,
-            }}
-          />
-        </TouchableOpacity>
-        <View
-          style={{
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexDirection: "row",
-            marginBottom: 10,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontFamily: "Roboto-Medium" }}>
-            Categories..
-          </Text>
-          <TouchableOpacity>
-            <Text style={{ color: "#0aada8" }}>See More</Text>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={sliderData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.image}
-          horizontal={true}
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
-        />
+        <HomeScreenPage />
       </ScrollView>
     </SafeAreaView>
   );

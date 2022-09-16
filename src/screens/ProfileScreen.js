@@ -1,6 +1,4 @@
 import {
-  FlatList,
-  ImageBackground,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -12,31 +10,42 @@ import {
   ActivityIndicator,
 } from "react-native";
 import COLORS from "../utils/Colors";
+import { CLOUDINARY_NAME, CLOUDINARY_PRESET } from "@env";
 import { useFonts } from "expo-font";
-import React, { useEffect, useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 import {
   MaterialIcons,
   FontAwesome,
   AntDesign,
   MaterialCommunityIcons,
   Fontisto,
+  FontAwesome5,
 } from "@expo/vector-icons";
 import { PROXY_URL } from "@env";
 import { AuthContext } from "../context/AuthContext";
 import SelectList from "react-native-dropdown-select-list";
 import TextInputWithLabel from "../components/TextInputWithLabel";
 import axios from "axios";
+import * as ImagePicker from "expo-image-picker";
 
 const ProfileScreen = ({ navigation }) => {
   const [loaded] = useFonts({
     "Roboto-Medium": require("../../assets/fonts/Roboto-Medium.ttf"),
     Montserrat: require("../../assets/fonts/Montserrat.ttf"),
   });
-  // const [isLoading, setIsLoading] = useState(false);
-  const { userInfo, userToken, updateProfile, isLoading } =
-    useContext(AuthContext);
+
+  const {
+    userInfo,
+    isLoading,
+    updateProfile,
+    updateProfilePhoto,
+    image,
+    setImage,
+  } = useContext(AuthContext);
   const [mobile, setMobile] = useState(userInfo.mobile);
   const [fullName, setFullName] = useState(userInfo.fullName);
+  const [designation, setDesignation] = useState(userInfo.designation);
+  const [editStatus, setEditStatus] = useState(false);
   const [zilla, setZilla] = useState("Dhaka");
   const [upzilla, setUpzilla] = useState("");
   const [thana, setThana] = useState("");
@@ -69,6 +78,45 @@ const ProfileScreen = ({ navigation }) => {
     { key: "4", value: "Chapai" },
   ];
 
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 4],
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.cancelled) {
+      setImage(result.uri);
+      //updateProfilePhoto(result.uri);
+      let base64Img = `data:image/jpg;base64,${result.base64}`;
+
+      //Add your cloud name
+      let apiUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_NAME}/image/upload`;
+
+      let data = {
+        file: base64Img,
+        upload_preset: `${CLOUDINARY_PRESET}`,
+      };
+
+      fetch(apiUrl, {
+        body: JSON.stringify(data),
+        headers: {
+          "content-type": "application/json",
+        },
+        method: "POST",
+      })
+        .then(async (r) => {
+          let data = await r.json();
+          updateProfilePhoto(data.secure_url);
+          return null;
+        })
+        .catch((err) => console.log(err));
+    }
+  };
+
   const submitFormHandler = async () => {
     let data = {
       fullName,
@@ -76,7 +124,9 @@ const ProfileScreen = ({ navigation }) => {
       nid,
       presentAddressDetails,
       permanentAddressDetails,
+      designation,
     };
+    setEditStatus(false);
     updateProfile(data);
   };
 
@@ -89,7 +139,7 @@ const ProfileScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <ScrollView style={{ padding: 20 }}>
-        <TouchableOpacity onPress={() => {}}>
+        <TouchableOpacity onPress={pickImage}>
           <View
             style={{
               borderColor: COLORS.main,
@@ -104,7 +154,11 @@ const ProfileScreen = ({ navigation }) => {
             }}
           >
             <Image
-              source={require("../../assets/images/user-profile.jpg")}
+              source={
+                userInfo.photo
+                  ? { uri: userInfo.photo }
+                  : require("../../assets/images/user-profile.jpg")
+              }
               style={{
                 width: 100,
                 height: 100,
@@ -113,7 +167,19 @@ const ProfileScreen = ({ navigation }) => {
             />
           </View>
         </TouchableOpacity>
-
+        <TouchableOpacity
+          style={{
+            marginRight: 5,
+            alignSelf: "flex-end",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "row",
+          }}
+          onPress={() => setEditStatus(!editStatus)}
+        >
+          <FontAwesome name="edit" size={20} color="#666" />
+          <Text style={{ marginLeft: 10 }}>Edit</Text>
+        </TouchableOpacity>
         <TextInputWithLabel
           label="Full Name"
           icon={
@@ -126,9 +192,11 @@ const ProfileScreen = ({ navigation }) => {
           }
           value={fullName}
           setValue={setFullName}
+          editPermission={editStatus}
         />
         <TextInputWithLabel
           label="Mobile"
+          editPermission={editStatus}
           icon={
             <MaterialIcons
               name="phone"
@@ -142,6 +210,7 @@ const ProfileScreen = ({ navigation }) => {
           keyboardType="phone-pad"
         />
         <TextInputWithLabel
+          editPermission={editStatus}
           label="Email"
           icon={
             <MaterialIcons
@@ -156,7 +225,23 @@ const ProfileScreen = ({ navigation }) => {
           keyboardType="email-address"
         />
         <TextInputWithLabel
+          editPermission={editStatus}
+          label="Designation"
+          icon={
+            <FontAwesome5
+              name="id-card-alt"
+              size={20}
+              color="#666"
+              style={{ marginRight: 5 }}
+            />
+          }
+          value={designation}
+          setValue={setDesignation}
+          keyboardType="email-address"
+        />
+        <TextInputWithLabel
           label="NID"
+          editPermission={editStatus}
           icon={
             <AntDesign
               name="idcard"
@@ -171,7 +256,7 @@ const ProfileScreen = ({ navigation }) => {
         />
 
         {/* present address  */}
-        <Text
+        {/* <Text
           style={{
             fontFamily: "Roboto-Medium",
             fontSize: 15,
@@ -239,9 +324,10 @@ const ProfileScreen = ({ navigation }) => {
             // search={false}
             //  onSelect={() => alert(selected)}
           />
-        </View>
+        </View> */}
         <TextInputWithLabel
           label="Present Address Details"
+          editPermission={editStatus}
           icon={
             <MaterialCommunityIcons
               name="home-city-outline"
@@ -255,7 +341,7 @@ const ProfileScreen = ({ navigation }) => {
         />
 
         {/* permanent address  */}
-        <Text
+        {/* <Text
           style={{
             fontFamily: "Roboto-Medium",
             fontSize: 15,
@@ -323,9 +409,10 @@ const ProfileScreen = ({ navigation }) => {
             // search={false}
             //  onSelect={() => alert(selected)}
           />
-        </View>
+        </View> */}
         <TextInputWithLabel
           label="Permanent Address Details"
+          editPermission={editStatus}
           icon={
             <Fontisto
               name="holiday-village"
@@ -337,19 +424,9 @@ const ProfileScreen = ({ navigation }) => {
           value={permanentAddressDetails}
           setValue={setPermanentAddressDetails}
         />
-        <TouchableOpacity
-          onPress={submitFormHandler}
-          style={{
-            flex: 1,
-            backgroundColor: COLORS.main,
-            padding: 20,
-            borderRadius: 10,
-            marginBottom: 30,
-          }}
-        >
-          {isLoading ? (
-            <ActivityIndicator />
-          ) : (
+
+        {!editStatus ? (
+          <TouchableOpacity disabled={true}>
             <Text
               style={{
                 textAlign: "center",
@@ -359,8 +436,33 @@ const ProfileScreen = ({ navigation }) => {
             >
               Save
             </Text>
-          )}
-        </TouchableOpacity>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={submitFormHandler}
+            style={{
+              flex: 1,
+              backgroundColor: COLORS.main,
+              padding: 20,
+              borderRadius: 10,
+              marginBottom: 30,
+            }}
+          >
+            {isLoading ? (
+              <ActivityIndicator />
+            ) : (
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "700",
+                  color: "white",
+                }}
+              >
+                Save
+              </Text>
+            )}
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
