@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [userToken, setUserToken] = useState(null);
   const [userInfo, setUserInfo] = useState();
   const [image, setImage] = useState("");
+  const [operationId, setOperationId] = useState(null);
   const [ukilRequestStatus, setUkilRequestStatus] = useState("make"); // make  wait  payment
   useEffect(() => {
     isLoggedIn();
@@ -75,8 +76,17 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(true);
       let userInfo = JSON.parse(await AsyncStorage.getItem("userInfo"));
       setUserInfo(userInfo);
+
+      let ukilRequestStatus = await AsyncStorage.getItem("ukilRequestStatus");
+      if (!ukilRequestStatus) setUkilRequestStatus("make");
+      setUkilRequestStatus(ukilRequestStatus);
+
+      let operationId = JSON.parse(await AsyncStorage.getItem("operationId"));
+      setOperationId(operationId);
+
       let userToken = await SecureStore.getItemAsync("userToken");
       setUserToken(userToken);
+
       setIsLoading(false);
     } catch (error) {
       if (error.response) {
@@ -145,13 +155,45 @@ export const AuthProvider = ({ children }) => {
         },
       });
       if (resp.data) {
-        setUkilRequestStatus("wait");
-        return alert(resp.data);
+        if (resp.data._id) {
+          setUkilRequestStatus("wait");
+          setOperationId(resp.data._id);
+          await AsyncStorage.setItem("ukilRequestStatus", "wait");
+          await AsyncStorage.setItem("operationId", resp.data._id);
+          return null;
+        } else {
+          return alert(resp.data);
+        }
       }
     } catch (err) {
       console.error(err);
       setIsLoading(false);
       return alert("Something went wrong...");
+    }
+  };
+
+  const cancelEmergencyCall = async () => {
+    try {
+      const operationId = await AsyncStorage.getItem("operationId");
+      console.log(operationId);
+      const res = await axios.put(
+        `${PROXY_URL}/api/users/cancel/operation/${operationId}`,
+        { a: "a" },
+        {
+          headers: {
+            "Content-type": "Application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (res) {
+        setUkilRequestStatus("make");
+        await AsyncStorage.setItem("ukilRequestStatus", "make");
+        await AsyncStorage.removeItem("operationId");
+        return alert(res.data.msg);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -198,6 +240,7 @@ export const AuthProvider = ({ children }) => {
         image,
         setImage,
         updateProfilePhoto,
+        cancelEmergencyCall,
       }}
     >
       {children}

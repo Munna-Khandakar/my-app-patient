@@ -27,6 +27,7 @@ const RequestScreen = () => {
     "Roboto-Medium": require("../../assets/fonts/Roboto-Medium.ttf"),
     Montserrat: require("../../assets/fonts/Montserrat.ttf"),
   });
+  const { cancelEmergencyCall } = useContext(AuthContext);
   return (
     <View>
       <TouchableOpacity
@@ -62,6 +63,7 @@ const RequestScreen = () => {
           color: "red",
           marginTop: 20,
         }}
+        onPress={cancelEmergencyCall}
       >
         Cancel Request
       </Text>
