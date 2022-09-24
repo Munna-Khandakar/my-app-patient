@@ -224,6 +224,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getMyRatings = async () => {
+    try {
+      const res = await axios.get(`${PROXY_URL}/api/users/myratings`, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-type": "Application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      return res.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -241,6 +256,7 @@ export const AuthProvider = ({ children }) => {
         setImage,
         updateProfilePhoto,
         cancelEmergencyCall,
+        getMyRatings,
       }}
     >
       {children}

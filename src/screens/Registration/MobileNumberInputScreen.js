@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import { useFonts } from "expo-font";
 import { MaterialIcons } from "@expo/vector-icons";
 import { PROXY_URL } from "@env";
+import COLORS from "../../utils/Colors";
 
 const MobileNumberInputScreen = ({ navigation }) => {
   const [loaded] = useFonts({
@@ -140,7 +141,7 @@ const MobileNumberInputScreen = ({ navigation }) => {
             style={{
               flex: 1,
               borderWidth: 1,
-              borderColor: "#AD40AF",
+              borderColor: COLORS.main,
               padding: 20,
               borderRadius: 10,
               marginBottom: 30,
@@ -151,7 +152,7 @@ const MobileNumberInputScreen = ({ navigation }) => {
               style={{
                 textAlign: "center",
                 fontWeight: "700",
-                color: "#AD40AF",
+                color: COLORS.main,
               }}
             >
               Back
@@ -162,7 +163,7 @@ const MobileNumberInputScreen = ({ navigation }) => {
             onPress={sendOTPCode}
             style={{
               flex: 1,
-              backgroundColor: "#AD40AF",
+              backgroundColor: COLORS.main,
               padding: 20,
               borderRadius: 10,
               marginBottom: 30,
@@ -191,7 +192,7 @@ const MobileNumberInputScreen = ({ navigation }) => {
               navigation.navigate("LoginScreen");
             }}
           >
-            <Text style={{ color: "#AD40AF", fontWeight: "700" }}>Login</Text>
+            <Text style={{ color: COLORS.main, fontWeight: "700" }}>Login</Text>
           </TouchableOpacity>
         </View>
       </View>

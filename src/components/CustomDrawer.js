@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useFonts } from "expo-font";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
@@ -17,15 +17,35 @@ import { AuthContext } from "../context/AuthContext";
 import COLORS from "../utils/Colors";
 
 const CustomDrawer = (props) => {
-  const { logout, userInfo } = useContext(AuthContext);
+  const { logout, userInfo, getMyRatings } = useContext(AuthContext);
+  const [myRatings, setMyRatings] = useState(0);
   const [loaded] = useFonts({
     Montserrat: require("../../assets/fonts/Montserrat.ttf"),
   });
-
+  useEffect(() => {
+    const updaterattings = async () => {
+      const r = await getMyRatings();
+      setMyRatings(r);
+    };
+    updaterattings();
+  });
   if (!loaded) {
     return null;
   }
-
+  const UserRatings = () => {
+    const rows = [];
+    for (let i = 1; i < myRatings + 1; i++) {
+      rows.push(
+        <MaterialIcons name="star-rate" size={20} color="white" key={i} />
+      );
+    }
+    for (let i = myRatings + 1; i < 6; i++) {
+      rows.push(
+        <MaterialIcons name="star-outline" size={20} color="white" key={i} />
+      );
+    }
+    return rows;
+  };
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView
@@ -52,7 +72,7 @@ const CustomDrawer = (props) => {
           <Text
             style={{ color: "white", fontSize: 20, fontFamily: "Montserrat" }}
           >
-            {userInfo.fullName ? userInfo.fullName : "loading..."}
+            {userInfo.fullName ? userInfo.fullName : "name not set"}
           </Text>
           <View
             style={{
@@ -61,11 +81,7 @@ const CustomDrawer = (props) => {
               width: 120,
             }}
           >
-            <MaterialIcons name="star-rate" size={20} color="white" />
-            <MaterialIcons name="star-rate" size={20} color="white" />
-            <MaterialIcons name="star-rate" size={20} color="white" />
-            <MaterialIcons name="star-half" size={20} color="white" />
-            <MaterialIcons name="star-outline" size={20} color="white" />
+            {myRatings ? <UserRatings /> : <Text>Calculating</Text>}
           </View>
         </ImageBackground>
         <View style={{ flex: 1, backgroundColor: "white", paddingTop: 10 }}>

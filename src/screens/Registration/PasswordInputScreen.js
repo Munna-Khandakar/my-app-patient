@@ -14,6 +14,7 @@ import { useFonts } from "expo-font";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import axios from "axios";
 import { PROXY_URL } from "@env";
+import COLORS from "../../utils/Colors";
 
 const PasswordInputScreen = ({ route, navigation }) => {
   const [loaded] = useFonts({
@@ -165,7 +166,7 @@ const PasswordInputScreen = ({ route, navigation }) => {
               flex: 1,
 
               borderWidth: 1,
-              borderColor: "#AD40AF",
+              borderColor: COLORS.main,
               padding: 20,
               borderRadius: 10,
               marginBottom: 30,
@@ -176,7 +177,7 @@ const PasswordInputScreen = ({ route, navigation }) => {
               style={{
                 textAlign: "center",
                 fontWeight: "700",
-                color: "#AD40AF",
+                color: COLORS.main,
               }}
             >
               Back
@@ -186,7 +187,7 @@ const PasswordInputScreen = ({ route, navigation }) => {
             onPress={registration}
             style={{
               flex: 1,
-              backgroundColor: "#AD40AF",
+              backgroundColor: COLORS.main,
               padding: 20,
               borderRadius: 10,
               marginBottom: 30,
@@ -215,7 +216,10 @@ const PasswordInputScreen = ({ route, navigation }) => {
               navigation.navigate("LoginScreen");
             }}
           >
-            <Text style={{ color: "#AD40AF", fontWeight: "700" }}>Login</Text>
+            <Text style={{ color: COLORS.main, fontWeight: "700" }}>
+              {" "}
+              Login
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

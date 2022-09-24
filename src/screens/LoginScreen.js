@@ -11,6 +11,7 @@ import React, { useContext, useState } from "react";
 import { useFonts } from "expo-font";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AuthContext } from "../context/AuthContext";
+import COLORS from "../utils/Colors";
 
 const LoginScreen = ({ navigation }) => {
   const { login } = useContext(AuthContext);
@@ -94,13 +95,15 @@ const LoginScreen = ({ navigation }) => {
             onChangeText={(number) => setPassword(number)}
           />
           <TouchableOpacity onPress={() => {}}>
-            <Text style={{ color: "#AD40AF", fontWeight: "700" }}>Forgot?</Text>
+            <Text style={{ color: COLORS.main, fontWeight: "700" }}>
+              Forgot?
+            </Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity
           onPress={() => login(mobile, password)}
           style={{
-            backgroundColor: "#AD40AF",
+            backgroundColor: COLORS.main,
             padding: 20,
             borderRadius: 10,
             marginBottom: 30,
@@ -119,7 +122,7 @@ const LoginScreen = ({ navigation }) => {
               navigation.navigate("RegistrationScreen");
             }}
           >
-            <Text style={{ color: "#AD40AF", fontWeight: "700" }}>
+            <Text style={{ color: COLORS.main, fontWeight: "700" }}>
               Register
             </Text>
           </TouchableOpacity>
